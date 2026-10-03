@@ -1,0 +1,6 @@
+@GameServerManager.WebAPI_HostAddress = http://localhost:5056
+
+GET {{GameServerManager.WebAPI_HostAddress}}/
+Accept: application/json
+
+###

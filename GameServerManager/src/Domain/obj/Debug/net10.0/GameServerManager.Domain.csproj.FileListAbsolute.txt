@@ -1,0 +1,11 @@
+D:\GameServerManager\src\Domain\bin\Debug\net10.0\GameServerManager.Domain.deps.json
+D:\GameServerManager\src\Domain\bin\Debug\net10.0\GameServerManager.Domain.dll
+D:\GameServerManager\src\Domain\bin\Debug\net10.0\GameServerManager.Domain.pdb
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.AssemblyInfoInputs.cache
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.AssemblyInfo.cs
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.csproj.CoreCompileInputs.cache
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.dll
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\refint\GameServerManager.Domain.dll
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\GameServerManager.Domain.pdb
+D:\GameServerManager\src\Domain\obj\Debug\net10.0\ref\GameServerManager.Domain.dll

@@ -1,0 +1,237 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GameServerManager.UI.ViewModels"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        x:Class="GameServerManager.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="ServerPulse Pro"
+        Width="1200" Height="900"
+        MinWidth="1000" MinHeight="700"
+        Background="{DynamicResource BackgroundColor}"
+        Foreground="{DynamicResource TextColor}"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="240, *">
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{DynamicResource SidebarColor}" Padding="20">
+            <StackPanel Spacing="20">
+                <TextBlock Text="ServerPulse" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center"/>
+                <Separator Background="{DynamicResource SurfaceColor}"/>
+                <Button Content="Containers" Command="{Binding ShowContainersViewCommand}" Classes="nav" />
+                <Button Content="Images" Command="{Binding ShowImagesViewCommand}" Classes="nav" />
+                <Button Content="Exec" Command="{Binding ShowExecViewCommand}" Classes="nav" />
+                <Button Content="Logs" Command="{Binding ShowLogsViewCommand}" Classes="nav" />
+                <Button Content="Stats" Command="{Binding ShowStatsViewCommand}" Classes="nav" />
+                <Separator Background="{DynamicResource SurfaceColor}"/>
+                <TextBlock Text="Status" FontSize="12" Foreground="{DynamicResource SecondaryTextColor}"/>
+                <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="12"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Margin="25">
+            
+            <!-- Containers View -->
+            <Grid IsVisible="{Binding IsContainersViewActive}" RowDefinitions="Auto, *, Auto">
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,20">
+                    <TextBlock Grid.Column="0" Text="Container Management" FontSize="28" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" Text="{Binding SearchText}" PlaceholderText="Search containers..." Width="250" VerticalAlignment="Center"/>
+                </Grid>
+
+                <dg:DataGrid Grid.Row="1" 
+                             ItemsSource="{Binding Containers}" 
+                             SelectedItem="{Binding SelectedContainer}" 
+                             AutoGenerateColumns="False" 
+                             IsReadOnly="True"
+                             Background="{DynamicResource SurfaceColor}"
+                             Foreground="{DynamicResource TextColor}"
+                             GridLinesVisibility="Horizontal"
+                             HorizontalGridLinesBrush="#334155"
+                             RowHeight="40"
+                             CornerRadius="8"
+                             ClipToBounds="True">
+                    <dg:DataGrid.Columns>
+                        <dg:DataGridTextColumn Header="Status" Binding="{Binding State}" Width="Auto"/>
+                        <dg:DataGridTextColumn Header="Name" Binding="{Binding Names}" Width="*"/>
+                        <dg:DataGridTextColumn Header="Image" Binding="{Binding Image}" Width="*"/>
+                        <dg:DataGridTemplateColumn Header="Port(s)" Width="Auto">
+                            <dg:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Ports}" Foreground="{Binding PortColor}" VerticalAlignment="Center" Margin="12,0"/>
+                                </DataTemplate>
+                            </dg:DataGridTemplateColumn.CellTemplate>
+                        </dg:DataGridTemplateColumn>
+                        <dg:DataGridTemplateColumn Header="Actions" Width="Auto">
+                            <dg:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="5,0">
+                                        <Button Content="Start" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StartExistingCommand}" CommandParameter="{Binding}" IsVisible="{Binding IsStopped}" Margin="2,0" Classes="action-start" />
+                                        <Button Content="Stop" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).StopServerCommand}" CommandParameter="{Binding}" IsVisible="{Binding IsRunning}" Margin="2,0" Classes="action-stop" />
+                                        <Button Content="Delete" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveContainerCommand}" CommandParameter="{Binding}" Margin="2,0" Classes="action-delete" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dg:DataGridTemplateColumn.CellTemplate>
+                        </dg:DataGridTemplateColumn>
+                    </dg:DataGrid.Columns>
+                </dg:DataGrid>
+                
+                <!-- Management Panel -->
+                <Border Grid.Row="2" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="20" Margin="0,20,0,0">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Create New Server" FontSize="18" FontWeight="SemiBold"/>
+                        <Grid ColumnDefinitions="*, *, *, Auto" ColumnSpacing="10">
+                            <TextBox Grid.Column="0" Text="{Binding ImageName}" PlaceholderText="Image name (e.g., nginx:alpine)"/>
+                            <TextBox Grid.Column="1" Text="{Binding ContainerName}" PlaceholderText="Container Name (optional)"/>
+                            <TextBox Grid.Column="2" Text="{Binding Port}" PlaceholderText="Host Port"/>
+                            <Button Grid.Column="3" Content="Create &amp; Start" Command="{Binding StartServerCommand}" Classes="primary"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Logs View -->
+            <Grid IsVisible="{Binding IsLogsViewActive}" RowDefinitions="Auto, Auto, *">
+                <TextBlock Grid.Row="0" Text="Container Logs" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                <!-- Selector Bar -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="15" Margin="0,0,0,20">
+                    <TextBlock Text="Select Container:" VerticalAlignment="Center" FontWeight="Medium"/>
+                    <ComboBox ItemsSource="{Binding Containers}" SelectedItem="{Binding SelectedLogContainer}" Width="300">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Names}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="Refresh Logs" Command="{Binding GetLogsForContainerCommand}" Classes="primary"/>
+                </StackPanel>
+
+                <!-- Terminal / Logs Output Panel -->
+                <Border Grid.Row="2" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="15">
+                    <TextBox Text="{Binding ContainerLogs}" 
+                             IsReadOnly="True" 
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas, monospace" 
+                             Background="{DynamicResource BackgroundColor}" 
+                             Foreground="{DynamicResource TextColor}"/>
+                </Border>
+            </Grid>
+
+            <!-- Stats View -->
+            <Grid IsVisible="{Binding IsStatsViewActive}" RowDefinitions="Auto, Auto, *">
+                <TextBlock Grid.Row="0" Text="Resource Monitoring (Stats)" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                <!-- Selector Bar -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="15" Margin="0,0,0,20">
+                    <TextBlock Text="Select Container:" VerticalAlignment="Center" FontWeight="Medium"/>
+                    <ComboBox ItemsSource="{Binding Containers}" SelectedItem="{Binding SelectedStatsContainer}" Width="300">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Names}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="Refresh Stats" Command="{Binding GetStatsForContainerCommand}" Classes="primary"/>
+                </StackPanel>
+
+                <!-- Metrics Display Cards -->
+                <Grid Grid.Row="2" ColumnDefinitions="*, *" ColumnSpacing="20">
+                    <Border Grid.Column="0" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="25" VerticalAlignment="Top">
+                        <StackPanel Spacing="10" HorizontalAlignment="Center">
+                            <TextBlock Text="CPU Usage" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextColor}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StatsCpuUsage}" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource AccentColor}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="25" VerticalAlignment="Top">
+                        <StackPanel Spacing="10" HorizontalAlignment="Center">
+                            <TextBlock Text="Memory Usage (RAM)" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextColor}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StatsMemoryUsage}" FontSize="36" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- Images View -->
+            <Grid IsVisible="{Binding IsImagesViewActive}" RowDefinitions="Auto, *">
+                <TextBlock Grid.Row="0" Text="Docker Images" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                <dg:DataGrid Grid.Row="1" 
+                             ItemsSource="{Binding Images}" 
+                             SelectedItem="{Binding SelectedImage}" 
+                             AutoGenerateColumns="False" 
+                             IsReadOnly="True"
+                             Background="{DynamicResource SurfaceColor}"
+                             Foreground="{DynamicResource TextColor}"
+                             GridLinesVisibility="None"
+                             RowHeight="40"
+                             CornerRadius="8"
+                             ClipToBounds="True">
+                    <dg:DataGrid.Columns>
+                        <dg:DataGridTextColumn Header="Name" Binding="{Binding Repository}" Width="2*"/>
+                        <dg:DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="*"/>
+                        <dg:DataGridTextColumn Header="Image ID" Binding="{Binding Id}" Width="*"/>
+                        <dg:DataGridTextColumn Header="Created" Binding="{Binding Created}" Width="Auto"/>
+                        <dg:DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="Auto"/>
+                        <dg:DataGridTemplateColumn Header="Actions" Width="Auto">
+                            <dg:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="5,0">
+                                        <Button Content="Delete" Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveImageCommand}" CommandParameter="{Binding}" Margin="2,0" Classes="action-delete" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dg:DataGridTemplateColumn.CellTemplate>
+                        </dg:DataGridTemplateColumn>
+                    </dg:DataGrid.Columns>
+                </dg:DataGrid>
+            </Grid>
+
+            <!-- Exec View -->
+            <Grid IsVisible="{Binding IsExecViewActive}" RowDefinitions="Auto, Auto, *, Auto">
+                <TextBlock Grid.Row="0" Text="Interactive Shell (Exec)" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                <!-- Selector Bar -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="15" Margin="0,0,0,20">
+                    <TextBlock Text="Select Container:" VerticalAlignment="Center" FontWeight="Medium"/>
+                    <ComboBox ItemsSource="{Binding Containers}" SelectedItem="{Binding SelectedExecContainer}" Width="300">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Names}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Terminal Output History Panel (Read-only) -->
+                <Border Grid.Row="2" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="15">
+                    <ScrollViewer>
+                        <TextBlock Text="{Binding CurrentExecOutput}" 
+                                   TextWrapping="Wrap"
+                                   FontFamily="Consolas, monospace" 
+                                   Foreground="#10B981"/>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Protected Command Input Line with # prompt -->
+                <Border Grid.Row="3" Background="{DynamicResource SurfaceColor}" CornerRadius="8" Padding="5,2" Margin="0,15,0,0">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <TextBlock Grid.Column="0" Text="# " Foreground="#10B981" FontWeight="Bold" FontFamily="Consolas, monospace" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBox Grid.Column="1" 
+                                 Text="{Binding ExecCommandInput}" 
+                                 PlaceholderText="Type a command and press Enter..." 
+                                 FontFamily="Consolas, monospace"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{DynamicResource TextColor}"
+                                 KeyDown="ExecInput_KeyDown"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,17 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\Application",
+    "\\src\\Application\\Models",
+    "\\src\\Domain",
+    "\\src\\Domain\\Entities",
+    "\\src\\GameServerManager.UI",
+    "\\src\\Infrastructure",
+    "\\src\\Infrastructure\\Services",
+    "\\src\\WebAPI",
+    "\\src\\WebAPI\\Controllers"
+  ],
+  "SelectedNode": "\\src\\WebAPI\\Program.cs",
+  "PreviewInSolutionExplorer": false
+}
