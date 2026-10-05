@@ -39,4 +39,4 @@ jobs:
       run: npm install -g newman
 
     - name: Run Postman Tests via Newman
-      run: newman run GameServerManager/ServerPulse.postman_collection.json --env-var "baseUrl=http://localhost:5056"
+      run: newman run GameServerManager/tests/postman/ServerPulse.postman_collection.json --env-var "baseUrl=http://localhost:5056"
